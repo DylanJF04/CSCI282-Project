@@ -1,1 +1,117 @@
+/* Dylan Fontenot
+* 12/1/2024
+* Class defining all actions and attributes of the Shop in the village
+*/
 
+import java.util.*;
+import javax.swing.*;
+
+public class Shop 
+{
+    private List<Item> stock;
+
+    public Shop() 
+    {
+        stock = new ArrayList<>(List.of(
+            new Item("Sword", "A sharp sword.", true, 150, true, false, false),
+            new Item("Shield", "A strong shield.", true, 100, false, true, false),
+            new Item("Helmet", "A sturdy helmet.", true, 80, false, true, false),
+            new Item("Potion", "Heals 50 health.", true, 50, false, false, true)
+        ));
+    }
+
+    public void displayShop(Player player) 
+    {
+        while (true) 
+        {
+            StringBuilder shopDisplay = new StringBuilder("Welcome to the shop! Your gold: " + player.getGold() + "\n\nItems for sale:\n");
+            for (int i = 0; i < stock.size(); i++) 
+            {
+                Item item = stock.get(i);
+                shopDisplay.append((i + 1)).append(". ").append(item.getName())
+                           .append(" - ").append(item.getValue()).append(" gold\n");
+            }
+            shopDisplay.append("\nType the number of the item to buy, 'sell' to sell items, or 'exit' to leave.");
+
+            String input = JOptionPane.showInputDialog(null, shopDisplay.toString(), "Shop", JOptionPane.PLAIN_MESSAGE);
+            if (input == null || input.equalsIgnoreCase("exit")) 
+            {
+                break;
+            }
+
+            if (input.equalsIgnoreCase("sell")) 
+            {
+                sellItems(player);
+            } else 
+            {
+                try 
+                {
+                    int choice = Integer.parseInt(input) - 1;
+                    if (choice >= 0 && choice < stock.size()) 
+                    {
+                        Item selectedItem = stock.get(choice);
+                        if (player.buyItem(selectedItem)) 
+                        {
+                            stock.remove(choice); // Remove from shop
+                            JOptionPane.showMessageDialog(null, "Your current gold balance: " + player.getGold() + " gold.", "Updated Balance", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    } else 
+                    {
+                        JOptionPane.showMessageDialog(null, "Invalid choice. Try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (NumberFormatException e) 
+                {
+                    JOptionPane.showMessageDialog(null, "Invalid input. Try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        }
+    }
+
+    private void sellItems(Player player) 
+    {
+        if (player.getInventory().isEmpty()) 
+        {
+            JOptionPane.showMessageDialog(null, "You have no items to sell.", "Sell Items", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        while (true) 
+        {
+            StringBuilder sellDisplay = new StringBuilder("Items you can sell:\n");
+            List<Item> inventory = player.getInventory();
+            for (int i = 0; i < inventory.size(); i++) 
+            {
+                Item item = inventory.get(i);
+                sellDisplay.append((i + 1)).append(". ").append(item.getName())
+                           .append(" - ").append(item.getValue() / 2).append(" gold (50% value)\n");
+            }
+            sellDisplay.append("\nType the number of the item to sell, or 'exit' to return to the shop.");
+
+            String input = JOptionPane.showInputDialog(null, sellDisplay.toString(), "Sell Items", JOptionPane.PLAIN_MESSAGE);
+            if (input == null || input.equalsIgnoreCase("exit")) 
+            {
+                break;
+            }
+
+            try 
+            {
+                int choice = Integer.parseInt(input) - 1;
+                if (choice >= 0 && choice < inventory.size()) 
+                {
+                    Item selectedItem = inventory.get(choice);
+                    player.addGold(selectedItem.getValue() / 2);
+                    player.removeItem(selectedItem);
+                    JOptionPane.showMessageDialog(null, "You sold " + selectedItem.getName() + " for " 
+                        + (selectedItem.getValue() / 2) + " gold.\nYour current gold: " + player.getGold(), "Item Sold", JOptionPane.INFORMATION_MESSAGE);
+                    return; // Exit after selling one item
+                } else 
+                {
+                    JOptionPane.showMessageDialog(null, "Invalid choice. Try again.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            } catch (NumberFormatException e) 
+            {
+                JOptionPane.showMessageDialog(null, "Invalid input. Try again.", "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+}
