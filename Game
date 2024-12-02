@@ -1,1 +1,325 @@
+/* Dylan Fontenot
+* 12/1/2024
+*Class to execute the game
+*/
 
+import javax.swing.*;
+import java.io.*;
+import java.util.*;
+
+public class Game 
+{
+    private Player player;
+    private Location currentLocation;
+    private boolean isRunning;
+    private Shop shop;
+
+    public void startGame() 
+    {
+        isRunning = true;
+        initializeGame();
+
+        JOptionPane.showMessageDialog(null, """
+                The Goblin King has been terrorizing the village, spreading chaos and destruction.
+                You are tasked with venturing forth, defeating his minions, and slaying the Goblin King
+                to bring peace back to the land.
+                """, "Adventure Game", JOptionPane.INFORMATION_MESSAGE);
+
+        while (isRunning) 
+        {
+            String input = JOptionPane.showInputDialog(null, getCommandPrompt(), "Adventure Game", JOptionPane.PLAIN_MESSAGE);
+            if (input == null) 
+            {
+                endGame();
+                break;
+            }
+            processInput(input.trim());
+        }
+    }
+
+    private void initializeGame() 
+    {
+        player = new Player("Hero", 100);
+        shop = new Shop();
+
+        Location forest = new Location("Forest", "A dense, dark forest with tall trees.");
+        Location cave = new Location("Cave", "A damp cave with echoing sounds.");
+        Location village = new Location("Village", "A small village with friendly locals.");
+        Location dungeonEntrance = new Location("Dungeon Entrance", "A foreboding stone gateway leading underground.");
+        Location goblinLair = new Location("Goblin Lair", "A dark chamber where the Goblin King resides.");
+
+        forest.setAdjacentLocation("north", cave);
+        cave.setAdjacentLocation("south", forest);
+        cave.setAdjacentLocation("east", dungeonEntrance);
+        dungeonEntrance.setAdjacentLocation("west", cave);
+        dungeonEntrance.setAdjacentLocation("north", goblinLair);
+        goblinLair.setAdjacentLocation("south", dungeonEntrance);
+        forest.setAdjacentLocation("east", village);
+        village.setAdjacentLocation("west", forest);
+
+        forest.addItem(new Item("Iron Sword", "A sturdy iron sword that increases damage.", true, 20, true, false, false));
+        cave.addItem(new Item("Leather Armor", "Light armor that mitigates damage.", true, 10, false, true, false));
+        village.addItem(new Item("Health Potion", "Restores 50 health.", true, 50, false, false, true));
+        goblinLair.setEnemy(new Enemy("Goblin King", 150, 30));
+
+        currentLocation = forest;
+
+        JOptionPane.showMessageDialog(null, "Welcome to the Adventure Game!", "Adventure Game", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private String getCommandPrompt() 
+    {
+        return """
+                Commands:
+                - go [direction]: Move to a new location (e.g., 'go north').
+                - look: View the current location and its details.
+                - take [item]: Pick up an item.
+                - equip [item]: Equip a weapon, armor, or consumable.
+                - use: Use an equipped consumable.
+                - inspect [item]: View details of an item in your inventory.
+                - attack: Attack an enemy, if present.
+                - search: Search the area for random events.
+                - inventory: View your inventory.
+                - shop: Visit the shop (only available in the village).
+                - save: Save your game.
+                - load: Load a previous game.
+                - quit: Exit the game.
+
+                What will you do?
+                """;
+    }
+
+    private void processInput(String input) 
+    {
+        String[] parts = input.split(" ", 2);
+        String command = parts[0].toLowerCase();
+
+        switch (command) 
+        {
+            case "go":
+                if (parts.length > 1) 
+                {
+                    move(parts[1]);
+                } else 
+                {
+                    JOptionPane.showMessageDialog(null, "Go where? Specify a direction.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case "look":
+                currentLocation.describe();
+                break;
+            case "take":
+                if (parts.length > 1) 
+                {
+                    takeItem(parts[1]);
+                } else 
+                {
+                    JOptionPane.showMessageDialog(null, "Take what? Specify an item.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case "equip":
+                if (parts.length > 1) 
+                {
+                    player.equipItem(parts[1]);
+                } else 
+                {
+                    JOptionPane.showMessageDialog(null, "Equip what? Specify an item.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case "use":
+                player.useConsumable();
+                break;
+            case "inspect":
+                if (parts.length > 1) 
+                {
+                    player.inspectItem(parts[1]);
+                } else 
+                {
+                    JOptionPane.showMessageDialog(null, "Inspect what? Specify an item.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                break;
+            case "attack":
+                attackEnemy();
+                break;
+            case "search":
+                searchLocation();
+                break;
+            case "inventory":
+                player.showInventory();
+                break;
+            case "shop":
+                visitShop();
+                break;
+            case "save":
+                saveGame();
+                break;
+            case "load":
+                loadGame();
+                break;
+            case "quit":
+                endGame();
+                break;
+            default:
+                JOptionPane.showMessageDialog(null, "Unknown command! Try again.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void move(String direction) 
+    {
+        Location nextLocation = currentLocation.getAdjacentLocation(direction.toLowerCase());
+        if (nextLocation != null) 
+        {
+            currentLocation = nextLocation;
+            JOptionPane.showMessageDialog(null, "You moved " + direction + ".", "Movement", JOptionPane.INFORMATION_MESSAGE);
+            currentLocation.describe();
+        } else 
+        {
+            JOptionPane.showMessageDialog(null, "You can't go that way!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void takeItem(String itemName) 
+    {
+        Item item = currentLocation.removeItem(itemName);
+        if (item != null) 
+        {
+            player.takeItem(item);
+        } else 
+        {
+            JOptionPane.showMessageDialog(null, "That item is not here!", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void attackEnemy() 
+    {
+        Enemy enemy = currentLocation.getEnemy();
+        if (enemy != null) 
+        {
+            player.attack(enemy);
+            if (enemy.getHealth() <= 0) 
+            {
+                currentLocation.setEnemy(null);
+
+                if (enemy.getName().equalsIgnoreCase("Goblin King")) 
+                {
+                    JOptionPane.showMessageDialog(null, "You have slain the Goblin King and saved the village! Victory!", "Victory", JOptionPane.INFORMATION_MESSAGE);
+                    endGame();
+                }
+            } else 
+            {
+                enemy.attackPlayer(player);
+                if (player.getHealth() <= 0) 
+                {
+                    JOptionPane.showMessageDialog(null, "You have been slain by " + enemy.getName() + ". Game Over.", "Defeat", JOptionPane.ERROR_MESSAGE);
+                    endGame();
+                }
+            }
+        } else 
+        {
+            JOptionPane.showMessageDialog(null, "There is no enemy here to attack.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void searchLocation() 
+    {
+
+        if (currentLocation.getName().equalsIgnoreCase("Cave")) 
+        {
+            Random random = new Random();
+            int event = random.nextInt(100);
+            if (event < 50) { // 50% chance in Cave
+                Enemy enemy = generateRandomEnemy();
+                currentLocation.setEnemy(enemy);
+                JOptionPane.showMessageDialog(null, "A wild " + enemy.getName() + " appears in the cave!", "Encounter", JOptionPane.INFORMATION_MESSAGE);
+                attackEnemy();
+            } else 
+            {
+                JOptionPane.showMessageDialog(null, "You searched the cave but found nothing.", "Search Result", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else if (currentLocation.getName().equalsIgnoreCase("Dungeon Entrance")) 
+        {
+            Random random = new Random();
+            int event = random.nextInt(100);
+            if (event < 75) { // 75% chance in Dungeon Entrance
+                Enemy enemy = generateRandomEnemy();
+                currentLocation.setEnemy(enemy);
+                JOptionPane.showMessageDialog(null, "A wild " + enemy.getName() + " appears at the dungeon entrance!", "Encounter", JOptionPane.INFORMATION_MESSAGE);
+                attackEnemy();
+            } else 
+            {
+                JOptionPane.showMessageDialog(null, "You searched the dungeon entrance but found nothing.", "Search Result", JOptionPane.INFORMATION_MESSAGE);
+            }
+        } else 
+        {
+            Random random = new Random();
+            int event = random.nextInt(100);
+            if (event < 40) { // 40% chance in other locations
+                Enemy enemy = generateRandomEnemy();
+                currentLocation.setEnemy(enemy);
+                JOptionPane.showMessageDialog(null, "A wild " + enemy.getName() + " appears!", "Encounter", JOptionPane.INFORMATION_MESSAGE);
+                attackEnemy();
+            } else 
+            {
+                JOptionPane.showMessageDialog(null, "You searched but found nothing.", "Search Result", JOptionPane.INFORMATION_MESSAGE);
+            }
+        }
+    }
+
+    private Enemy generateRandomEnemy() 
+    {
+        Random random = new Random();
+        List<Enemy> enemies = List.of(
+            new Enemy("Ogre", 100, 35),
+            new Enemy("Goblin", 35, 10),
+            new Enemy("Orc", 45, 18),
+            new Enemy("Skeleton Warrior", 40, 15),
+            new Enemy("Skeleton Archer", 30, 14),
+            new Enemy("Wolf", 25, 5)
+        );
+        return enemies.get(random.nextInt(enemies.size()));
+    }
+
+    private void visitShop() 
+    {
+        if (currentLocation.getName().equalsIgnoreCase("village")) 
+        {
+            shop.displayShop(player);
+        } else 
+        {
+            JOptionPane.showMessageDialog(null, "There is no shop here.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void saveGame() 
+    {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("savegame.dat"))) 
+        {
+            out.writeObject(player);
+            out.writeObject(currentLocation);
+            JOptionPane.showMessageDialog(null, "Game saved successfully.", "Save Game", JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException e) 
+        {
+            JOptionPane.showMessageDialog(null, "Error saving game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void loadGame() 
+    {
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream("savegame.dat"))) 
+        {
+            player = (Player) in.readObject();
+            currentLocation = (Location) in.readObject();
+            JOptionPane.showMessageDialog(null, "Game loaded successfully.", "Load Game", JOptionPane.INFORMATION_MESSAGE);
+            currentLocation.describe();
+        } catch (IOException | ClassNotFoundException e) 
+        {
+            JOptionPane.showMessageDialog(null, "Error loading game: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void endGame() 
+    {
+        isRunning = false;
+        JOptionPane.showMessageDialog(null, "Thanks for playing!", "Goodbye", JOptionPane.INFORMATION_MESSAGE);
+    }
+}
