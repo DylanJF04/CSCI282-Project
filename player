@@ -1,1 +1,203 @@
+/* Dylan Fontenot
+* 12/1/2024
+* Class defining all actions and attributes of the player/user
+*/
+import java.io.Serializable;
+import java.util.*;
+import javax.swing.*;
 
+public class Player implements Serializable 
+{
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private int health;
+    private int gold;
+    private int baseDamage;
+    private int baseDefense;
+    private List<Item> inventory;
+
+    // Equipment slots
+    private Item equippedWeapon;
+    private Item equippedArmor;
+    private Item equippedConsumable;
+
+    public Player(String name, int health) 
+    {
+        this.name = name;
+        this.health = health;
+        this.gold = 100; // Starting gold
+        this.baseDamage = 10; // Base damage without a weapon
+        this.baseDefense = 0; // Base defense without armor
+        this.inventory = new ArrayList<>();
+    }
+
+    // Equip items: Weapon, Armor, Consumable
+    public void equipItem(String itemName) 
+    {
+        for (Item item : inventory) 
+        {
+            if (item.getName().equalsIgnoreCase(itemName)) 
+            {
+                if (item.isWeapon()) 
+                {
+                    if (equippedWeapon != null) 
+                    {
+                        JOptionPane.showMessageDialog(null, "You already have a weapon equipped (" + equippedWeapon.getName() + "). Unequip it first to equip a new one.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    equippedWeapon = item;
+                    JOptionPane.showMessageDialog(null, "You equipped the weapon: " + item.getName(), "Weapon Equipped", JOptionPane.INFORMATION_MESSAGE);
+                } else if (item.isArmor()) 
+                {
+                    if (equippedArmor != null) 
+                    {
+                        JOptionPane.showMessageDialog(null, "You already have armor equipped (" + equippedArmor.getName() + "). Unequip it first to equip a new one.", "Error", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
+                    equippedArmor = item;
+                    JOptionPane.showMessageDialog(null, "You equipped the armor: " + item.getName(), "Armor Equipped", JOptionPane.INFORMATION_MESSAGE);
+                } else if (item.isConsumable()) 
+                {
+                    equippedConsumable = item;
+                    JOptionPane.showMessageDialog(null, "You equipped the consumable: " + item.getName(), "Consumable Equipped", JOptionPane.INFORMATION_MESSAGE);
+                } else 
+                {
+                    JOptionPane.showMessageDialog(null, "This item cannot be equipped.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+                return;
+            }
+        }
+        JOptionPane.showMessageDialog(null, "Item not found in your inventory.", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    public void useConsumable() 
+    {
+        if (equippedConsumable != null) 
+    {
+            health += equippedConsumable.getValue();
+            inventory.remove(equippedConsumable);
+            JOptionPane.showMessageDialog(null, "You used " + equippedConsumable.getName() + " and restored " + equippedConsumable.getValue() + " health!", "Consumable Used", JOptionPane.INFORMATION_MESSAGE);
+            equippedConsumable = null; // Reset consumable slot
+        } else 
+        {
+            JOptionPane.showMessageDialog(null, "You have no consumable equipped.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Calculate total damage including weapon's value
+    public int calculateDamage() 
+    {
+        return baseDamage + (equippedWeapon != null ? equippedWeapon.getValue() : 0);
+    }
+
+    // Calculate total defense including armor's value
+    public int calculateDefense() 
+    {
+        return baseDefense + (equippedArmor != null ? equippedArmor.getValue() : 0);
+    }
+
+    // Taking Damage, applying mitigation from armor
+    public void takeDamage(int damage) 
+    {
+        int mitigatedDamage = Math.max(damage - calculateDefense(), 0); // Ensure damage isn't negative
+        health -= mitigatedDamage;
+
+        JOptionPane.showMessageDialog(null, "You took " + mitigatedDamage + " damage. Health: " + health, "Damage Taken", JOptionPane.WARNING_MESSAGE);
+
+        if (health <= 0) 
+        {
+            health = 0;
+            JOptionPane.showMessageDialog(null, "You have died.", "Game Over", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+// Attacking an enemy
+    public void attack(Enemy enemy) 
+    {
+        int damage = calculateDamage();
+        enemy.takeDamage(damage);
+        JOptionPane.showMessageDialog(null, "You attacked the " + enemy.getName() + " for " + damage + " damage!", "Combat", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Showing all items in the players inventory
+    public void showInventory() 
+    {
+        if (inventory.isEmpty()) 
+        {
+            JOptionPane.showMessageDialog(null, "Your inventory is empty.", "Inventory", JOptionPane.INFORMATION_MESSAGE);
+        } else 
+        {
+            StringBuilder inventoryList = new StringBuilder("Your inventory:\n");
+            for (Item item : inventory) 
+            {
+                inventoryList.append("- ").append(item.getName()).append(" (").append(item.getDescription()).append(")\n");
+            }
+            JOptionPane.showMessageDialog(null, inventoryList.toString(), "Inventory", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+// Add item to the player's inventory
+    public void takeItem(Item item) 
+    {
+        inventory.add(item);
+        JOptionPane.showMessageDialog(null, item.getName() + " added to your inventory.", "Item Added", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Remove item from the player's inventory (used when selling items)
+    public void removeItem(Item item) 
+    {
+        inventory.remove(item);
+    }
+
+    // Add gold to the player's balance
+    public void addGold(int amount) 
+    {
+        gold += amount;
+        JOptionPane.showMessageDialog(null, "You now have " + gold + " gold.", "Gold Update", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    // Return the player's gold balance
+    public int getGold() 
+    {
+        return gold;
+    }
+
+    // Return the player's health
+    public int getHealth() 
+    {
+        return health;
+    }
+
+    public void inspectItem(String itemName) 
+    {
+      for (Item item : inventory) 
+      {
+        if (item.getName().equalsIgnoreCase(itemName)) 
+        {
+            JOptionPane.showMessageDialog(null, item.getName() + ": " + item.getDescription(), "Inspect Item", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+      }
+      JOptionPane.showMessageDialog(null, "You don't have an item called \"" + itemName + "\".", "Error", JOptionPane.ERROR_MESSAGE);
+    }
+    
+    public boolean buyItem(Item item) 
+    {
+      if (gold >= item.getValue()) 
+      {
+        gold -= item.getValue(); // Deduct gold
+        inventory.add(item);     // Add item to inventory
+        JOptionPane.showMessageDialog(null, "You bought " + item.getName() + " for " + item.getValue() + " gold.", "Item Bought", JOptionPane.INFORMATION_MESSAGE);
+        return true;
+      } else 
+      {
+        JOptionPane.showMessageDialog(null, "You don't have enough gold to buy this item.", "Error", JOptionPane.ERROR_MESSAGE);
+        return false;
+      }
+    }
+
+    public List<Item> getInventory() 
+    {
+    return inventory;
+    }
+}
