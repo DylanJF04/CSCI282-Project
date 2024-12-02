@@ -1,7 +1,6 @@
-
-/**
- *
- * @author dylan
+/* Dylan Fontenot 
+ *  12/1/2024
+ * Main call for the adventure game
  */
 
 public class Main {
