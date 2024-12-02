@@ -1,1 +1,114 @@
+/* Dylan Fontenot
+* 12/1/2024
+* Class defining all attributes for the locations in the game
+*/
 
+import java.io.Serializable;
+import java.util.*;
+import javax.swing.*;
+
+public class Location implements Serializable 
+{
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private String description;
+    private List<Item> items;
+    private Enemy enemy;
+    private Map<String, Location> adjacentLocations;
+
+    public Location(String name, String description) 
+    {
+        this.name = name;
+        this.description = description;
+        this.items = new ArrayList<>();
+        this.adjacentLocations = new HashMap<>();
+    }
+
+    public void setAdjacentLocation(String direction, Location location) 
+    {
+        adjacentLocations.put(direction, location);
+    }
+
+    public Location getAdjacentLocation(String direction) 
+    {
+        return adjacentLocations.get(direction);
+    }
+
+    public void addItem(Item item) 
+    {
+        items.add(item);
+    }
+
+    public Item removeItem(String itemName) 
+    {
+        for (Item item : items) 
+        {
+            if (item.getName().equalsIgnoreCase(itemName)) 
+            {
+                items.remove(item);
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public void setEnemy(Enemy enemy) 
+    {
+        this.enemy = enemy;
+    }
+
+    public Enemy getEnemy() 
+    {
+        return enemy;
+    }
+
+    public void describe() 
+    {
+        StringBuilder details = new StringBuilder("You are at: " + name + "\n" + description + "\n");
+
+        if (!items.isEmpty()) 
+        {
+            details.append("You see the following items:\n");
+            for (Item item : items) 
+            {
+                details.append("- ").append(item.getName()).append("\n");
+            }
+        }
+
+        if (enemy != null) 
+        {
+            details.append("An enemy is here: ").append(enemy.getName()).append("\n");
+        }
+
+        if (!adjacentLocations.isEmpty()) 
+        {
+            details.append("You can go:\n");
+            for (String direction : adjacentLocations.keySet()) 
+            {
+                details.append("- ").append(direction).append("\n");
+            }
+        }
+
+        JOptionPane.showMessageDialog(null, details.toString(), "Location Details", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public Item dropRandomItem() 
+    {
+        List<Item> possibleDrops = List.of(
+            new Item("Axe", "A heavy, sharp axe.", true, 100, true, false, false),
+            new Item("Bow", "A long-range weapon.", true, 80, true, false, false),
+            new Item("Mace", "A blunt, spiked mace.", true, 120, true, false, false),
+            new Item("Helmet", "A sturdy helmet for protection.", true, 50, false, true, false),
+            new Item("Potion", "Restores 30 health.", true, 30, false, false, true)
+        );
+
+        Random random = new Random();
+        return possibleDrops.get(random.nextInt(possibleDrops.size()));
+    }
+
+    public String getName() 
+    {
+        return name;
+    }
+}
