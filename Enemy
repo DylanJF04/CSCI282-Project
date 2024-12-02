@@ -1,1 +1,49 @@
+/* Dylan Fontenot
+* 12/1/2024
+* Class defining all actions and attributes of the enemies that will show up
+*/
 
+import java.io.Serializable;
+import javax.swing.*;
+
+public class Enemy implements Serializable 
+{
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private int health;
+    private int strength;
+
+    public Enemy(String name, int health, int strength) 
+    {
+        this.name = name;
+        this.health = health;
+        this.strength = strength;
+    }
+
+    public String getName() 
+    {
+        return name;
+    }
+
+    public int getHealth() 
+    {
+        return health;
+    }
+
+    public void attackPlayer(Player player) 
+    {
+        JOptionPane.showMessageDialog(null, name + " attacks!", "Enemy Attack", JOptionPane.WARNING_MESSAGE);
+        player.takeDamage(strength);
+    }
+
+    public void takeDamage(int damage) 
+    {
+        health -= damage;
+        JOptionPane.showMessageDialog(null, name + " took " + damage + " damage. Health: " + health, "Enemy Hit", JOptionPane.INFORMATION_MESSAGE);
+        if (health <= 0) 
+        {
+            JOptionPane.showMessageDialog(null, name + " has been defeated!", "Enemy Defeated", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+}
