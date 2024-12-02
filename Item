@@ -1,1 +1,65 @@
+/* Dylan Fontenot
+* 12/1/2024
+* Class defining all actions and attributes of the Shop in the village
+*/
 
+import java.io.Serializable;
+
+public class Item implements Serializable 
+{
+    private static final long serialVersionUID = 1L;
+
+    private String name;
+    private String description;
+    private boolean isPickable;
+    private int value;
+    private boolean isWeapon;
+    private boolean isArmor;
+    private boolean isConsumable;
+
+    public Item(String name, String description, boolean isPickable, int value, boolean isWeapon, boolean isArmor, boolean isConsumable) 
+    {
+        this.name = name;
+        this.description = description;
+        this.isPickable = isPickable;
+        this.value = value;
+        this.isWeapon = isWeapon;
+        this.isArmor = isArmor;
+        this.isConsumable = isConsumable;
+    }
+
+    public String getName() 
+    {
+        return name;
+    }
+
+    public String getDescription() 
+    {
+        return description;
+    }
+
+    public int getValue() 
+    {
+        return value;
+    }
+
+    public boolean isPickable() 
+    {
+        return isPickable;
+    }
+
+    public boolean isWeapon() 
+    {
+        return isWeapon;
+    }
+
+    public boolean isArmor() 
+    {
+        return isArmor;
+    }
+
+    public boolean isConsumable() 
+    {
+        return isConsumable;
+    }
+}
