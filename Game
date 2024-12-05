@@ -42,11 +42,11 @@ public class Game
         player = new Player("Hero", 100);
         shop = new Shop();
 
-        Location forest = new Location("Forest", "A dense, dark forest with tall trees.");
-        Location cave = new Location("Cave", "A damp cave with echoing sounds.");
-        Location village = new Location("Village", "A small village with friendly locals.");
-        Location dungeonEntrance = new Location("Dungeon Entrance", "A foreboding stone gateway leading underground.");
-        Location goblinLair = new Location("Goblin Lair", "A dark chamber where the Goblin King resides.");
+        Location forest = new Location("Forest", "A dense, dark forest with tall trees.", "Forest.jpg");
+        Location cave = new Location("Cave", "A damp cave with echoing sounds.", "Cave.jpg");
+        Location village = new Location("Village", "A small village with friendly locals.", "Village.jpg");
+        Location dungeonEntrance = new Location("Dungeon Entrance", "A foreboding stone gateway leading underground.", "LairEntrance.jpg");
+        Location goblinLair = new Location("Goblin Lair", "A dark chamber where the Goblin King resides.", "GoblinLair.jpg");
 
         forest.setAdjacentLocation("north", cave);
         cave.setAdjacentLocation("south", forest);
