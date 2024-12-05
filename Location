@@ -16,11 +16,13 @@ public class Location implements Serializable
     private List<Item> items;
     private Enemy enemy;
     private Map<String, Location> adjacentLocations;
+    private String imagePath; // Path to the location's image
 
-    public Location(String name, String description) 
+    public Location(String name, String description, String imagePath) 
     {
         this.name = name;
         this.description = description;
+        this.imagePath = imagePath; // Assign the image path
         this.items = new ArrayList<>();
         this.adjacentLocations = new HashMap<>();
     }
@@ -90,21 +92,9 @@ public class Location implements Serializable
             }
         }
 
-        JOptionPane.showMessageDialog(null, details.toString(), "Location Details", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public Item dropRandomItem() 
-    {
-        List<Item> possibleDrops = List.of(
-            new Item("Axe", "A heavy, sharp axe.", true, 100, true, false, false),
-            new Item("Bow", "A long-range weapon.", true, 80, true, false, false),
-            new Item("Mace", "A blunt, spiked mace.", true, 120, true, false, false),
-            new Item("Helmet", "A sturdy helmet for protection.", true, 50, false, true, false),
-            new Item("Potion", "Restores 30 health.", true, 30, false, false, true)
-        );
-
-        Random random = new Random();
-        return possibleDrops.get(random.nextInt(possibleDrops.size()));
+        // Display image with details
+        ImageIcon locationImage = new ImageIcon(imagePath); // Load the image
+        JOptionPane.showMessageDialog(null, details.toString(), "Location Details", JOptionPane.INFORMATION_MESSAGE, locationImage);
     }
 
     public String getName() 
