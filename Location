@@ -16,13 +16,13 @@ public class Location implements Serializable
     private List<Item> items;
     private Enemy enemy;
     private Map<String, Location> adjacentLocations;
-    private String imagePath; // Path to the location's image
+    private String imagePath;
 
     public Location(String name, String description, String imagePath) 
     {
         this.name = name;
         this.description = description;
-        this.imagePath = imagePath; // Assign the image path
+        this.imagePath = imagePath;
         this.items = new ArrayList<>();
         this.adjacentLocations = new HashMap<>();
     }
@@ -92,8 +92,7 @@ public class Location implements Serializable
             }
         }
 
-        // Display image with details
-        ImageIcon locationImage = new ImageIcon(imagePath); // Load the image
+        ImageIcon locationImage = new ImageIcon(imagePath);
         JOptionPane.showMessageDialog(null, details.toString(), "Location Details", JOptionPane.INFORMATION_MESSAGE, locationImage);
     }
 
