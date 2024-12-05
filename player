@@ -121,9 +121,11 @@ public class Player implements Serializable
     // Showing all items in the players inventory
     public void showInventory() 
     {
+        ImageIcon inventoryImage = new ImageIcon("Inventory.jpg");
+
         if (inventory.isEmpty()) 
         {
-            JOptionPane.showMessageDialog(null, "Your inventory is empty.", "Inventory", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Your inventory is empty.", "Inventory", JOptionPane.INFORMATION_MESSAGE, inventoryImage);
         } else 
         {
             StringBuilder inventoryList = new StringBuilder("Your inventory:\n");
@@ -131,7 +133,7 @@ public class Player implements Serializable
             {
                 inventoryList.append("- ").append(item.getName()).append(" (").append(item.getDescription()).append(")\n");
             }
-            JOptionPane.showMessageDialog(null, inventoryList.toString(), "Inventory", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(null, inventoryList.toString(), "Inventory", JOptionPane.INFORMATION_MESSAGE, inventoryImage);
         }
     }
 
