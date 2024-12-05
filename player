@@ -116,7 +116,6 @@ public class Player implements Serializable
     {
         int damage = calculateDamage();
         enemy.takeDamage(damage);
-        JOptionPane.showMessageDialog(null, "You attacked the " + enemy.getName() + " for " + damage + " damage!", "Combat", JOptionPane.INFORMATION_MESSAGE);
     }
 
     // Showing all items in the players inventory
