@@ -99,8 +99,6 @@ public class Player implements Serializable
     // Taking Damage, applying mitigation from armor
     public void takeDamage(int damage) 
     {
-        ImageIcon losingImage = new ImageIcon("loss.png");
-        
         int mitigatedDamage = Math.max(damage - calculateDefense(), 0); // Ensure damage isn't negative
         health -= mitigatedDamage;
 
@@ -109,7 +107,7 @@ public class Player implements Serializable
         if (health <= 0) 
         {
             health = 0;
-            JOptionPane.showMessageDialog(null, "You have died.", "Game Over", JOptionPane.ERROR_MESSAGE, losingImage);
+            JOptionPane.showMessageDialog(null, "You have died.", "Game Over", JOptionPane.ERROR_MESSAGE);
         }
     }
 
